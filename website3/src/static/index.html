@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website3.com - PHP Backend with Multisitesso Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #667eea;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .badge {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        nav {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: transparent;
+            color: #374151;
+        }
+        
+        .nav-btn:hover {
+            background: #f3f4f6;
+        }
+        
+        .nav-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        main {
+            padding: 2rem 0;
+        }
+        
+        .hero {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .icon-php { background: #777bb4; }
+        .icon-widget { background: #10b981; }
+        .icon-auth { background: #f59e0b; }
+        .icon-api { background: #ef4444; }
+        
+        .widget-container {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1rem 0;
+            background: #f9fafb;
+        }
+        
+        .widget-header {
+            background: #f3f4f6;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 500;
+            color: #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-loading {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-authenticated {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-unauthenticated {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .widget-iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
+            background: white;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-list li::before {
+            content: '✓';
+            color: #10b981;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            background: #d1fae5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .code-block {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        footer {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">PHP</div>
+                    <span>Website3.com</span>
+                    <div class="badge">PHP Backend</div>
+                </div>
+                <nav>
+                    <button class="nav-btn active" onclick="showTab('demo')">Widget Demo</button>
+                    <button class="nav-btn" onclick="showTab('backend')">PHP Backend</button>
+                    <button class="nav-btn" onclick="showTab('integration')">Integration</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="hero">
+            <h1>PHP Backend with Multisitesso Widget</h1>
+            <p>Server-side PHP application demonstrating cross-domain authentication and widget integration with seamless user experience.</p>
+        </div>
+
+        <!-- Demo Tab -->
+        <div id="demo-tab" class="tab-content">
+            <div class="content-grid">
+                <div class="card">
+                    <h3>
+                        <div class="card-icon icon-widget">W</div>
+                        Live Widget Integration
+                    </h3>
+                    <p>The widget below is embedded from website1.com and communicates with our PHP backend for authentication state management.</p>
+                    
+                    <div class="widget-container">
+                        <div class="widget-header">
+                            <span>Multisitesso User Profile Widget</span>
+                            <div class="status-badge status-loading" id="auth-status">Loading...</div>
+                        </div>
+                        <iframe 
+                            id="widget-iframe"
+                            class="widget-iframe"
+                            src="https://3000-iulhipjpw6slcboeknu21-4abb91c0.manusvm.computer/embed"
+                            title="Multisitesso User Profile Widget">
+                        </iframe>
+                    </div>
+                    
+                    <div id="user-info" class="hidden">
+                        <h4>Synchronized User Data:</h4>
+                        <div id="user-details"></div>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" onclick="testLogin()">Test Login</button>
+                        <button class="btn btn-secondary" onclick="testLogout()">Test Logout</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>
+                        <div class="card-icon icon-php">PHP</div>
+                        PHP Backend Features
+                    </h3>
+                    <ul class="feature-list">
+                        <li>Server-side session management</li>
+                        <li>JWT token validation</li>
+                        <li>Cross-domain cookie handling</li>
+                        <li>RESTful API endpoints</li>
+                        <li>Database integration</li>
+                        <li>Secure authentication flow</li>
+                    </ul>
+                    
+                    <h4>Test Credentials:</h4>
+                    <div class="code-block">
+Email: john.doe@example.com
+Password: password123
+
+Email: jane.smith@example.com  
+Password: password123
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backend Tab -->
+        <div id="backend-tab" class="tab-content hidden">
+            <div class="content-grid">
+                <div class="card">
+                    <h3>
+                        <div class="card-icon icon-api">API</div>
+                        PHP Authentication API
+                    </h3>
+                    <p>Our PHP backend provides robust authentication services with JWT token management.</p>
+                    
+                    <h4>Available Endpoints:</h4>
+                    <div class="code-block">
+GET  /api/auth/status    - Check authentication status
+POST /api/auth/validate  - Validate JWT token  
+POST /api/auth/login     - User login
+POST /api/auth/logout    - User logout
+GET  /api/user/profile   - Get user profile
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="testAPI()">Test API Endpoints</button>
+                    <div id="api-results"></div>
+                </div>
+
+                <div class="card">
+                    <h3>
+                        <div class="card-icon icon-auth">AUTH</div>
+                        Session Management
+                    </h3>
+                    <p>PHP session handling with secure cookie management and cross-domain support.</p>
+                    
+                    <h4>Current Session Info:</h4>
+                    <div id="session-info">
+                        <div class="code-block" id="session-details">Loading session information...</div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="checkSession()">Refresh Session Info</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Tab -->
+        <div id="integration-tab" class="tab-content hidden">
+            <div class="content-grid">
+                <div class="card">
+                    <h3>PHP Integration Code</h3>
+                    <p>Server-side PHP code for widget integration and authentication.</p>
+                    
+                    <div class="code-block">
+&lt;?php
+// Validate Multisitesso JWT token
+function validateMultisitessoToken($token) {
+    $widget_host = 'https://website1.com';
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'header' => "Authorization: Bearer $token\r\n"
+        ]
+    ]);
+    
+    $response = file_get_contents(
+        "$widget_host/api/auth", 
+        false, 
+        $context
+    );
+    
+    return json_decode($response, true);
+}
+
+// Check authentication from cookie
+$token = $_COOKIE['multisitesso_auth'] ?? null;
+$user = null;
+
+if ($token) {
+    $auth_result = validateMultisitessoToken($token);
+    if ($auth_result && $auth_result['isAuthenticated']) {
+        $user = $auth_result['user'];
+        $_SESSION['user'] = $user;
+    }
+}
+?&gt;
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Frontend Integration</h3>
+                    <p>JavaScript code for embedding the widget in PHP applications.</p>
+                    
+                    <div class="code-block">
+&lt;!-- Widget Container --&gt;
+&lt;div id="multisitesso-widget"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+// Initialize widget communication
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://website1.com') return;
+    
+    const { type, data } = event.data;
+    
+    if (type === 'AUTH_STATE_CHANGED') {
+        // Update PHP session via AJAX
+        fetch('/api/auth/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                isAuthenticated: data.isAuthenticated,
+                user: data.user,
+                token: data.token
+            })
+        });
+    }
+});
+
+// Embed widget iframe
+const iframe = document.createElement('iframe');
+iframe.src = 'https://website1.com/embed';
+iframe.style.width = '100%';
+iframe.style.height = '300px';
+document.getElementById('multisitesso-widget').appendChild(iframe);
+&lt;/script&gt;
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Website3.com - PHP Backend with Multisitesso Widget Integration</p>
+            <p>Demonstrating server-side authentication and cross-domain widget communication</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Widget communication
+        let isAuthenticated = false;
+        let currentUser = null;
+
+        window.addEventListener('message', function(event) {
+            // Only accept messages from the widget host
+            if (event.origin !== 'https://3000-iulhipjpw6slcboeknu21-4abb91c0.manusvm.computer') {
+                return;
+            }
+
+            const { type, data } = event.data;
+
+            switch (type) {
+                case 'AUTH_STATE_CHANGED':
+                    handleAuthStateChange(data);
+                    break;
+                case 'WIDGET_READY':
+                    updateAuthStatus('Ready');
+                    break;
+            }
+        });
+
+        function handleAuthStateChange(data) {
+            isAuthenticated = data.isAuthenticated;
+            currentUser = data.user;
+            
+            const statusElement = document.getElementById('auth-status');
+            const userInfoElement = document.getElementById('user-info');
+            const userDetailsElement = document.getElementById('user-details');
+            
+            if (isAuthenticated && currentUser) {
+                statusElement.textContent = 'Authenticated';
+                statusElement.className = 'status-badge status-authenticated';
+                
+                userDetailsElement.innerHTML = `
+                    <p><strong>Name:</strong> ${currentUser.name}</p>
+                    <p><strong>Email:</strong> ${currentUser.email}</p>
+                    <p><strong>Status:</strong> Active</p>
+                `;
+                userInfoElement.classList.remove('hidden');
+            } else {
+                statusElement.textContent = 'Not Authenticated';
+                statusElement.className = 'status-badge status-unauthenticated';
+                userInfoElement.classList.add('hidden');
+            }
+            
+            // Sync with PHP backend
+            syncWithBackend(data);
+        }
+
+        function updateAuthStatus(status) {
+            const statusElement = document.getElementById('auth-status');
+            statusElement.textContent = status;
+            statusElement.className = 'status-badge status-loading';
+        }
+
+        function syncWithBackend(authData) {
+            // In a real PHP application, this would sync the authentication state
+            // with the PHP session via an AJAX call
+            fetch('/api/auth/sync', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(authData)
+            }).catch(error => {
+                console.log('Backend sync not available in demo mode');
+            });
+        }
+
+        function testLogin() {
+            const iframe = document.getElementById('widget-iframe');
+            iframe.contentWindow.postMessage({
+                type: 'SHOW_LOGIN_FORM'
+            }, 'https://3000-iulhipjpw6slcboeknu21-4abb91c0.manusvm.computer');
+        }
+
+        function testLogout() {
+            const iframe = document.getElementById('widget-iframe');
+            iframe.contentWindow.postMessage({
+                type: 'LOGOUT'
+            }, 'https://3000-iulhipjpw6slcboeknu21-4abb91c0.manusvm.computer');
+        }
+
+        function testAPI() {
+            const resultsElement = document.getElementById('api-results');
+            resultsElement.innerHTML = `
+                <div class="code-block">
+API Test Results:
+- Authentication Status: ${isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+- Current User: ${currentUser ? currentUser.name : 'None'}
+- Session Active: ${isAuthenticated ? 'Yes' : 'No'}
+- Backend Communication: Demo Mode
+                </div>
+            `;
+        }
+
+        function checkSession() {
+            const sessionDetails = document.getElementById('session-details');
+            sessionDetails.textContent = `
+Session ID: demo_session_${Date.now()}
+User Authenticated: ${isAuthenticated ? 'Yes' : 'No'}
+User Data: ${currentUser ? JSON.stringify(currentUser, null, 2) : 'None'}
+Last Updated: ${new Date().toLocaleString()}
+            `;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthStatus('Initializing...');
+            checkSession();
+        });
+    </script>
+</body>
+</html>
+
