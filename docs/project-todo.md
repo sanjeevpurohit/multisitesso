@@ -8,13 +8,13 @@
 - [x] Commit initial project structure
 
 ## Phase 2: Create micro frontend widget with React/Remix
-- [ ] Set up Remix development environment
-- [ ] Create user profile widget components
-- [ ] Implement widget API endpoints
-- [ ] Add authentication hooks
-- [ ] Style the widget with responsive design
-- [ ] Test widget functionality locally
-- [ ] Commit widget implementation
+- [x] Set up Remix development environment
+- [x] Create user profile widget components
+- [x] Implement widget API endpoints
+- [x] Add authentication hooks
+- [x] Style the widget with responsive design
+- [x] Test widget functionality locally
+- [x] Commit widget implementation
 
 ## Phase 3: Implement cross-domain authentication system
 - [ ] Design JWT-based authentication system
