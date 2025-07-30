@@ -18,6 +18,49 @@ const users = new Map([
   }],
 ]);
 
+// Simple JWT implementation for demo (in production, use a proper JWT library)
+const JWT_SECRET = "multisitesso-secret-key-2024";
+
+function generateJWT(user: any) {
+  const header = { alg: "HS256", typ: "JWT" };
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    avatar: user.avatar,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
+    iss: "multisitesso-auth",
+    aud: ["website1.com", "website2.com", "website3.com"]
+  };
+
+  const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, "");
+  const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, "");
+  
+  // Simple signature (in production, use proper HMAC)
+  const signature = btoa(`${encodedHeader}.${encodedPayload}.${JWT_SECRET}`).replace(/=/g, "");
+  
+  return `${encodedHeader}.${encodedPayload}.${signature}`;
+}
+
+function verifyJWT(token: string) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const payload = JSON.parse(atob(parts[1]));
+    
+    // Check expiry
+    if (payload.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
 function setCORSHeaders(origin: string) {
   return {
     "Access-Control-Allow-Origin": origin || "*",
@@ -38,31 +81,35 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
   }
 
-  // Get current user from session/token
-  // In production, this would validate JWT token
+  // Get current user from JWT token
   const authHeader = request.headers.get("Authorization");
   
-  if (!authHeader) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return json(
       { user: null, isAuthenticated: false },
       { headers: setCORSHeaders(origin) }
     );
   }
 
-  // Mock token validation
   const token = authHeader.replace("Bearer ", "");
-  const user = Array.from(users.values()).find(u => u.id === token);
+  const payload = verifyJWT(token);
 
-  if (!user) {
+  if (!payload) {
     return json(
       { user: null, isAuthenticated: false },
       { headers: setCORSHeaders(origin) }
     );
   }
 
-  const { password, ...userWithoutPassword } = user;
+  const user = {
+    id: payload.sub,
+    name: payload.name,
+    email: payload.email,
+    avatar: payload.avatar,
+  };
+
   return json(
-    { user: userWithoutPassword, isAuthenticated: true },
+    { user, isAuthenticated: true },
     { headers: setCORSHeaders(origin) }
   );
 }
@@ -94,9 +141,13 @@ export async function action({ request }: ActionFunctionArgs) {
       }
 
       const { password: _, ...userWithoutPassword } = user;
-      
-      // In production, generate a real JWT token
-      const token = user.id;
+      const token = generateJWT(user);
+
+      // Set secure cookie for cross-domain authentication
+      const headers = {
+        ...setCORSHeaders(origin),
+        "Set-Cookie": `multisitesso_auth=${token}; HttpOnly; Secure; SameSite=None; Max-Age=86400; Path=/`,
+      };
 
       return json(
         { 
@@ -104,20 +155,25 @@ export async function action({ request }: ActionFunctionArgs) {
           token,
           isAuthenticated: true 
         },
-        { headers: setCORSHeaders(origin) }
+        { headers }
       );
     }
 
     case "logout": {
+      const headers = {
+        ...setCORSHeaders(origin),
+        "Set-Cookie": "multisitesso_auth=; HttpOnly; Secure; SameSite=None; Max-Age=0; Path=/",
+      };
+
       return json(
         { user: null, isAuthenticated: false },
-        { headers: setCORSHeaders(origin) }
+        { headers }
       );
     }
 
     case "update": {
       const authHeader = request.headers.get("Authorization");
-      if (!authHeader) {
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return json(
           { error: "Unauthorized" },
           { status: 401, headers: setCORSHeaders(origin) }
@@ -125,8 +181,16 @@ export async function action({ request }: ActionFunctionArgs) {
       }
 
       const token = authHeader.replace("Bearer ", "");
-      const user = Array.from(users.values()).find(u => u.id === token);
+      const payload = verifyJWT(token);
 
+      if (!payload) {
+        return json(
+          { error: "Invalid token" },
+          { status: 401, headers: setCORSHeaders(origin) }
+        );
+      }
+
+      const user = Array.from(users.values()).find(u => u.id === payload.sub);
       if (!user) {
         return json(
           { error: "User not found" },
@@ -138,13 +202,21 @@ export async function action({ request }: ActionFunctionArgs) {
       const email = formData.get("email") as string;
 
       // Update user data
-      user.name = name || user.name;
-      user.email = email || user.email;
+      if (name) user.name = name;
+      if (email) user.email = email;
 
+      // Generate new token with updated info
+      const newToken = generateJWT(user);
       const { password, ...userWithoutPassword } = user;
+
+      const headers = {
+        ...setCORSHeaders(origin),
+        "Set-Cookie": `multisitesso_auth=${newToken}; HttpOnly; Secure; SameSite=None; Max-Age=86400; Path=/`,
+      };
+
       return json(
-        { user: userWithoutPassword, isAuthenticated: true },
-        { headers: setCORSHeaders(origin) }
+        { user: userWithoutPassword, token: newToken, isAuthenticated: true },
+        { headers }
       );
     }
 
